@@ -1,3 +1,4 @@
+import os
 import asyncio
 import json
 import logging
@@ -7,7 +8,8 @@ from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
 
-TOKEN = "563468769:AAGwT-eH4Td8aE56we0ZUTa-bkh0_21FU5o"
+TOKEN = os.getenv('BOT_TOKEN')
+print(TOKEN)
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 

@@ -1,0 +1,23 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "func",
+      "command": "host start",
+      "problemMatcher": "$func-python-watch",
+      "isBackground": true,
+      "options": {
+        "cwd": "${workspaceFolder}/mybot"
+      },
+      "dependsOn":["Init Envs"]
+    },    
+    {
+      "label": "Init Envs",
+      "type": "shell",
+      "command": "export $(xargs < ${workspaceFolder}/.env) && func settings add BOT_TOKEN ${BOT_TOKEN}",
+      "options": {
+        "cwd": "${workspaceFolder}/mybot"
+      },
+    },
+  ]
+}
