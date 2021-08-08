@@ -1,0 +1,203 @@
+{
+	"info": {
+		"_postman_id": "008f6e40-e95b-48a0-a96b-f38f330fc60a",
+		"name": "AKV",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authenticate",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "{{APP_ID}}",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "{{CLIENT_KEY}}",
+							"type": "text"
+						},
+						{
+							"key": "scope",
+							"value": "https://vault.azure.net/.default",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://login.microsoftonline.com/{{TENANT_ID}}/oauth2/v2.0/token",
+					"protocol": "https",
+					"host": [
+						"login",
+						"microsoftonline",
+						"com"
+					],
+					"path": [
+						"{{TENANT_ID}}",
+						"oauth2",
+						"v2.0",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Allowed Users ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"More than 1 users provided\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.value).to.include(\";\")",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://keyvault-teamcityetl.vault.azure.net/secrets/botUsersIDs?api-version=2016-10-01",
+					"protocol": "https",
+					"host": [
+						"keyvault-teamcityetl",
+						"vault",
+						"azure",
+						"net"
+					],
+					"path": [
+						"secrets",
+						"botUsersIDs"
+					],
+					"query": [
+						{
+							"key": "api-version",
+							"value": "2016-10-01"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Bot Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Bot Token provided\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.value.length).to.be.eql(45)",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://keyvault-teamcityetl.vault.azure.net/secrets/SharegoodToken?api-version=2016-10-01",
+					"protocol": "https",
+					"host": [
+						"keyvault-teamcityetl",
+						"vault",
+						"azure",
+						"net"
+					],
+					"path": [
+						"secrets",
+						"SharegoodToken"
+					],
+					"query": [
+						{
+							"key": "api-version",
+							"value": "2016-10-01"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "client_authentication",
+				"value": "body",
+				"type": "string"
+			},
+			{
+				"key": "scope",
+				"value": "https://vault.azure.net/.default",
+				"type": "string"
+			},
+			{
+				"key": "clientSecret",
+				"value": "{{CLIENT_KEY}}",
+				"type": "string"
+			},
+			{
+				"key": "clientId",
+				"value": "{{APP_ID}}",
+				"type": "string"
+			},
+			{
+				"key": "accessTokenUrl",
+				"value": "https://login.microsoftonline.com/{{TENANT_ID}}/oauth2/v2.0/token",
+				"type": "string"
+			},
+			{
+				"key": "grant_type",
+				"value": "client_credentials",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Status code is 200\", function () {",
+					"    pm.response.to.have.status(200);",
+					"});"
+				]
+			}
+		}
+	]
+}
