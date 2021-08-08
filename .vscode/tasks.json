@@ -14,7 +14,7 @@
     {
       "label": "Init Envs",
       "type": "shell",
-      "command": "export $(xargs < ${workspaceFolder}/.env) && func settings add BOT_TOKEN ${BOT_TOKEN}",
+      "command": "export $(xargs < ${workspaceFolder}/.env) && func settings add CLIENT_KEY ${CLIENT_KEY} && func settings add APP_ID ${APP_ID} && func settings add TENANT_ID ${TENANT_ID}",
       "options": {
         "cwd": "${workspaceFolder}/mybot"
       },
