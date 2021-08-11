@@ -39,7 +39,7 @@ class AKVConnector():
 
 
     def get_allowed_users(self) -> List[int]:
-        url = "https://keyvault-teamcityetl.vault.azure.net/secrets/botUsersIDs?api-version=2016-10-01"
+        url = f"https://${self.akv_url}/secrets/botUsersIDs?api-version=2016-10-01"
         payload = {}
         headers = {
             'Authorization': f'Bearer {self.azure_ad_token}'
