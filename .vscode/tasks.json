@@ -14,7 +14,7 @@
     {
       "label": "Init Envs",
       "type": "shell",
-      "command": "export $(xargs < ${workspaceFolder}/.env) && func settings add CLIENT_KEY ${CLIENT_KEY} && func settings add APP_ID ${APP_ID} && func settings add TENANT_ID ${TENANT_ID}",
+      "command": "export $(xargs < ${workspaceFolder}/.env) && func settings add CLIENT_KEY ${CLIENT_KEY} && func settings add APP_ID ${APP_ID} && func settings add TENANT_ID ${TENANT_ID} && func settings add AKV_URL ${AKV_URL}",
       "options": {
         "cwd": "${workspaceFolder}/mybot"
       },
