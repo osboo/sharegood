@@ -5,7 +5,7 @@ on:
     branches: [ master ]
 
 jobs:
-  Publish to Dockerhub:
+  Publish:
     runs-on: [ubuntu-latest]
     env:
         DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
