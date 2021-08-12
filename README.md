@@ -1,3 +1,4 @@
+![Publish](https://github.com/osboo/sharegood/actions/workflows/publish.yaml/badge.svg)
 # sharegood
 Telegram bot for tracking car expences and notifications of regular service
 
