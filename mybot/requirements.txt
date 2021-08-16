@@ -14,3 +14,4 @@ yarl==1.6.3
 requests==2.26
 azure-storage >= 0.34.3
 autopep8
+pytest

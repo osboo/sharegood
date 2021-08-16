@@ -44,3 +44,4 @@ __pycache__/
 *$py.class
 utils/set-bot-token.sh
 utils/ngrok-url.json
+__azurite_db_table__.json

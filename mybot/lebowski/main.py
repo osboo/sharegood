@@ -2,10 +2,11 @@ import os
 import logging
 
 import azure.functions as func
+from azure.storage.table import TableService
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 
-from lebowski.connections_telegram import AKVConnector, TableStorageConnector
+from lebowski.azure_connections import AKVConnector
 from middlewares.access import AccessMiddleware
 
 TENANT_ID = os.getenv('TENANT_ID')
@@ -16,10 +17,10 @@ ENV=os.getenv('ENV')
 akv = AKVConnector(tenant_id=TENANT_ID, client_id=CLIENT_ID, client_secret=CLIENT_SECRET, env=ENV)
 
 bot = Bot(token=akv.get_bot_token())
-print(akv.get_bot_token())
 dp = Dispatcher(bot)
 dp.middleware.setup(AccessMiddleware(access_ids=akv.get_allowed_users()))
-storage_account = TableStorageConnector(akv.get_storage_connection_string())
+storage_account = TableService(connection_string=akv.get_storage_connection_string(), is_emulated=(ENV != "prod"))
+
 
 @dp.message_handler()
 async def echo_message(msg: types.Message):
