@@ -23,6 +23,7 @@ jobs:
       if: always()
 
   Publish:
+    needs: [run_tests]
     runs-on: ubuntu-latest
     env:
       AZURE_FUNCTIONAPP_PACKAGE_PATH: './mybot' # set this to the path to your web app project, defaults to the repository root
@@ -50,4 +51,6 @@ jobs:
         app-name: 'lebowski-bot'
         slot-name: 'production'
         package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-        publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}    
+        publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+        scm-do-build-during-deployment: true
+        enable-oryx-build: true
