@@ -4,6 +4,7 @@ on: pull_request
 
 jobs:
   run_tests:
+    name: Build Azure Func image and run tests
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -12,6 +13,7 @@ jobs:
       run: docker-compose --project-directory ./mybot up  --abort-on-container-exit --build
     - name: Extract test report
       run: docker cp lebowski-bot-ci:/pytest.xml .
+      if: always()
     - name: Publish Unit Test Results
       uses: EnricoMi/publish-unit-test-result-action@v1
       if: always()
