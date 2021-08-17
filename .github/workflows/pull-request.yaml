@@ -8,5 +8,10 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v1
-    - name: Start containers
+    - name: Build and Test
       run: docker-compose --project-directory ./mybot up  --abort-on-container-exit --build
+    - name: Extract test report
+      run: docker cp lebowski-bot-ci:/pytest.xml .
+    - name: Publish Unit Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v1
+      if: always()
