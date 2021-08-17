@@ -1,7 +1,12 @@
 name: Check Pull-Request
 
-on: [pull_request]
+on: pull_request
 
 jobs:
   run_tests:
-    runs-on: []
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Start containers
+      run: docker-compose --project-directory ./mybot up  --abort-on-container-exit --build
