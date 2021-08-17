@@ -11,5 +11,5 @@ AZURE_AD_TOKEN=$(curl -s \
     --form "client_secret=${CLIENT_KEY}" \
     --form "scope=https://vault.azure.net/.default" | jq -r .access_token)
 
-curl -s --location --request GET "https://${AKV_URL}/secrets/SharegoodToken?api-version=2016-10-01" \
+curl -s --location --request GET "https://keyvault-teamcityetl.vault.azure.net/secrets/SharegoodToken?api-version=2016-10-01" \
 --header "Authorization: Bearer ${AZURE_AD_TOKEN}" | jq -r .value
