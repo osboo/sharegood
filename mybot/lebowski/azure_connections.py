@@ -49,4 +49,6 @@ class AKVConnector():
             result = response.json().get("value")
         else:
             result = os.getenv(f'{secret_name}')
+            if result is None:
+                raise ValueError(f"{secret_name} environment variable is not set")
         return result
