@@ -31,4 +31,4 @@ def test_add_gas_spending(empty_tables: TableService):
     entities = empty_tables.query_entities(Tables.SPENDINGS, filter=f"PartitionKey eq 'gas' and RowKey gt '{test_moment_key}' and RowKey lt '123:20000000000'")
     result = [e for e in entities]
     assert len(result) == 1
-    assert result[0]['amount'] == 30.0
+    assert result[0]['amount'] == 31.0
