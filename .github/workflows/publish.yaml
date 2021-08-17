@@ -1,4 +1,4 @@
-name: Publish on Docker Hub and Deploy
+name: Deployment To Production
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   Publish:
-    runs-on: [ubuntu-latest]
+    runs-on: ubuntu-latest
     env:
         DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
         DOCKERHUB_REPOSITORY: ${{ secrets.DOCKERHUB_REPOSITORY }}

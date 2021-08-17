@@ -1,0 +1,11 @@
+version: '3.9'
+services:
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+
+  lebowski-bot:
+    build: .
+    container_name: lebowski-bot-ci
+    environment:
+      - StorageAccountConnectionString=${CONNECTION_STRING}
+    command: "pytest -o log_cli=True --cov=/home/site/wwwroot/lebowski /home/site/wwwroot/ --junit-xml pytest.xml"

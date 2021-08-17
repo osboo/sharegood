@@ -10,7 +10,8 @@
 	"extensions": [
 		"ms-azuretools.vscode-azurefunctions",
 		"ms-azuretools.vscode-docker",
-		"ms-python.python"
+		"ms-python.python",
+		"azurite.azurite"
 	],
 	
 	"postStartCommand": "pip install -r mybot/requirements.txt",

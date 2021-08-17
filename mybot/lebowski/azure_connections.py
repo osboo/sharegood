@@ -1,15 +1,14 @@
+import os
 from typing import List
 import requests
-from azure.storage.table import TableService
 
 
 class AKVConnector():
-    def __init__(self, akv_url: str, tenant_id: str, client_id: str, client_secret: str) -> None:
-        self.akv_url = akv_url
+    def __init__(self, tenant_id: str, client_id: str, client_secret: str, env="prod") -> None:
         self.tenant_id = tenant_id
         self.client_id = client_id
         self.client_secret = client_secret
-        self.azure_ad_token = self.get_azure_ad_token()
+        self.env = env
 
     def get_azure_ad_token(self) -> str:
         url = f"https://login.microsoftonline.com/{self.tenant_id}/oauth2/v2.0/token"
@@ -40,19 +39,14 @@ class AKVConnector():
         return self._request_from_akv("StorageAccountConnectionString")
 
     def _request_from_akv(self, secret_name: str) -> str:
-        url = f"https://{self.akv_url}/secrets/{secret_name}?api-version=2016-10-01"
-        payload = {}
-        headers = {
-            'Authorization': f'Bearer {self.azure_ad_token}'
-        }
-
-        response = requests.request("GET", url, headers=headers, data=payload)
-        result = response.json().get("value")
+        if self.env == "prod":
+            url = f"https://keyvault-teamcityetl.vault.azure.net/secrets/{secret_name}?api-version=2016-10-01"
+            payload = {}
+            headers = {
+                'Authorization': f'Bearer {self.get_azure_ad_token()}'
+            }
+            response = requests.request("GET", url, headers=headers, data=payload)
+            result = response.json().get("value")
+        else:
+            result = os.getenv(f'{secret_name}')
         return result
-
-
-class TableStorageConnector():
-    def __init__(self, storage_connection_string: str) -> None:
-        self.storage_connection_string = storage_connection_string
-        self.table_service = TableService(
-            connection_string=self.storage_connection_string)

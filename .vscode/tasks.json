@@ -14,7 +14,7 @@
     {
       "label": "Init Envs",
       "type": "shell",
-      "command": "export $(xargs < ${workspaceFolder}/.env) && func settings add CLIENT_KEY ${CLIENT_KEY} && func settings add APP_ID ${APP_ID} && func settings add TENANT_ID ${TENANT_ID} && func settings add AKV_URL ${AKV_URL}",
+      "command": "cat ${workspaceFolder}/.env | xargs -L 1 python -c \"import sys; p = sys.argv[1].split('='); p[1] = \\\"=\\\".join(p[1:]); print(f'func settings add {p[0]} \\\"{p[1]}\\\";')\" | { message=$(</dev/stdin) && eval $message; };",
       "options": {
         "cwd": "${workspaceFolder}/mybot"
       },
