@@ -24,7 +24,7 @@ storage_account = TableService(connection_string=akv.get_storage_connection_stri
 
 @dp.message_handler()
 async def echo_message(msg: types.Message):
-    tables = [table.name for table in storage_account.table_service.list_tables()]
+    tables = [table.name for table in storage_account.list_tables()]
     await bot.send_message(msg.from_user.id, f"Echo: {msg.text} " + "".join(tables))
 
 async def main(req: func.HttpRequest) -> func.HttpResponse:
