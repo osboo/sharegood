@@ -9,10 +9,11 @@ from lebowski.enums import CCY, Tables
 @pytest.fixture()
 def empty_tables():
     akv = AKVConnector("Not used", "Not used", "Not used", env="dev")
-    storage_account = TableService(connection_string=akv.get_storage_connection_string())
-    logger = logging.getLogger()
+    connection_string = akv.get_storage_connection_string()
+    logger = logging.getLogger("unit-tests")
     logger.setLevel(logging.INFO)
-    logger.info("Connection String " + akv.get_storage_connection_string())
+    logger.info("Connection String " + connection_string)
+    storage_account = TableService(connection_string=connection_string)    
     for table_name in [Tables.SPENDINGS, Tables.MILEAGE, Tables.REMINDERS]:
         storage_account.create_table(table_name)
 
