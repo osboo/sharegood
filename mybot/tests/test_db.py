@@ -1,13 +1,13 @@
 import pytest
 from azure.storage.table import TableService
-import lebowski.azure_connections as connector
+from lebowski.db import DBHelper
+from lebowski.enums import CCY, Tables
 
 
 @pytest.fixture()
 def empty_tables():
-    akv = connector.AKVConnector(tenant_id="Not used", client_id="Not used", client_secret="Not used", env="dev")
-    storage_account = TableService(connection_string=akv.get_storage_connection_string(), is_emulated=True)
-    for table_name in ["spendings", "mileage", "reminders"]:
+    storage_account = TableService(is_emulated=True)
+    for table_name in [Tables.SPENDINGS, Tables.MILEAGE, Tables.REMINDERS]:
         storage_account.create_table(table_name)
 
     tables = storage_account.list_tables()
@@ -19,7 +19,10 @@ def empty_tables():
         storage_account.delete_table(t.name)
 
 def test_add_gas_spending(empty_tables: TableService):
-    customer = {'PartitionKey': 'Harp', 'RowKey': '1', 'email' : 'harp@contoso.com', 'phone' : '555-555-5555'}
-    empty_tables.insert_entity("spendings", customer)
-    entity = empty_tables.get_entity("spendings", partition_key='Harp', row_key='1')
-    assert entity['email'] == 'harp@contoso.com'
+    db = DBHelper(empty_tables)
+    db.add_gas_record("123", 30, CCY.BYN)
+    test_moment_key = db.get_new_key("123")
+    entities = empty_tables.query_entities(Tables.SPENDINGS, filter=f"PartitionKey eq 'gas' and RowKey gt '{test_moment_key}' and RowKey lt '123:20000000000'")
+    result = [e for e in entities]
+    assert len(result) == 1
+    assert result[0]['amount'] == 30.0
