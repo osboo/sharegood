@@ -7,7 +7,7 @@ jobs:
     name: Build Azure Func image and run tests
     runs-on: ubuntu-latest
     env:
-        CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
+        StorageAccountConnectionString: ${{ secrets.STORAGEACCOUNTCONNECTIONSTRING }}
     steps:
     - name: Checkout
       uses: actions/checkout@v1

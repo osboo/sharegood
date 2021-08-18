@@ -7,5 +7,5 @@ services:
     build: .
     container_name: lebowski-bot-ci
     environment:
-      - StorageAccountConnectionString=${CONNECTION_STRING}
+      - StorageAccountConnectionString=${StorageAccountConnectionString}
     command: "pytest -o log_cli=True --cov=/home/site/wwwroot/lebowski /home/site/wwwroot/ --junit-xml pytest.xml"
