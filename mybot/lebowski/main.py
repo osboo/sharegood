@@ -7,6 +7,7 @@ from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 
 from lebowski.azure_connections import AKVConnector
+from lebowski.router import route
 from middlewares.access import AccessMiddleware
 
 TENANT_ID = os.getenv('TENANT_ID')
@@ -24,8 +25,13 @@ storage_account = TableService(connection_string=akv.get_storage_connection_stri
 
 @dp.message_handler()
 async def echo_message(msg: types.Message):
-    tables = [table.name for table in storage_account.list_tables()]
-    await bot.send_message(msg.from_user.id, f"Echo: {msg.text} " + "".join(tables))
+    try:
+        (action, args) = route(msg.text)
+        action(args, storage_account)
+        await bot.send_message(msg.from_user.id, f"Received: {msg.text}")
+    except Exception as e:
+        logging.error(e)
+        await bot.send_message(msg.from_user.id, f"Received: {msg.text}, server error {str(e)}")    
 
 async def main(req: func.HttpRequest) -> func.HttpResponse:
     update = req.get_json()
