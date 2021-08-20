@@ -19,3 +19,33 @@ jobs:
     - name: Publish Unit Test Results
       uses: EnricoMi/publish-unit-test-result-action@v1
       if: always()
+
+  run_tests_2:
+    name: Run only unit-tests
+    runs-on: ubuntu-latest
+    env:
+        StorageAccountConnectionString: ${{ secrets.STORAGEACCOUNTCONNECTIONSTRING }}
+    services:
+      azure-table-emulator:
+        image: mcr.microsoft.com/azure-storage/azurite
+        ports:
+          - 10002:10002
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r mybot/requirements.txt
+    - name: Fix connection string
+      run: |
+        x=${StorageAccountConnectionString//azurite/127.0.0.1}
+        echo "::set-env StorageAccountConnectionString=${x}"
+    - name: Test
+      run: pytest -o log_cli=True --cov=./mybot/lebowski ./mybot --junit-xml pytest.xml
+    - name: Extract test report
+      run: docker cp lebowski-bot-ci:/pytest.xml .
+      if: always()
+    - name: Publish Unit Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v1
+      if: always()
