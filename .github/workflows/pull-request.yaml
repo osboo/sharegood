@@ -39,9 +39,6 @@ jobs:
         pip install -r mybot/requirements.txt
     - name: Test
       run: pytest -o log_cli=True --cov=./mybot/lebowski ./mybot --junit-xml pytest.xml
-    - name: Extract test report
-      run: docker cp lebowski-bot-ci:/pytest.xml .
-      if: always()
     - name: Publish Unit Test Results
       uses: EnricoMi/publish-unit-test-result-action@v1
       if: always()
