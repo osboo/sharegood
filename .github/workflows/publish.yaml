@@ -6,7 +6,7 @@ on:
 
 jobs:
   run_unit_tests:
-    name: Run Unit Tests
+    name: Unit Tests Run
     runs-on: ubuntu-latest
     env:
         StorageAccountConnectionString: ${{ secrets.STORAGEACCOUNTCONNECTIONSTRING_LOCAL }}
