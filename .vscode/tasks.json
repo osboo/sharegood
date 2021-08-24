@@ -9,15 +9,25 @@
       "options": {
         "cwd": "${workspaceFolder}/mybot"
       },
-      "dependsOn":["Init Envs"]
+      "dependsOn":["Setup Database", "Init Function Env"]
     },    
     {
-      "label": "Init Envs",
+      "label": "Setup Database",
+      "type": "shell",
+      "command": "export $(xargs < ${workspaceFolder}/.env) && python tests/setup_test_db.py clean && python tests/setup_test_db.py init",
+      "options": {
+        "cwd": "${workspaceFolder}/mybot",
+        "env": { "PYTHONPATH": "${workspaceRoot}/mybot"},
+      },
+      "dependsOn":["Init Shell env"]
+    },
+    {
+      "label": "Init Function Env",
       "type": "shell",
       "command": "cat ${workspaceFolder}/.env | xargs -L 1 python -c \"import sys; p = sys.argv[1].split('='); p[1] = \\\"=\\\".join(p[1:]); print(f'func settings add {p[0]} \\\"{p[1]}\\\";')\" | { message=$(</dev/stdin) && eval $message; };",
       "options": {
         "cwd": "${workspaceFolder}/mybot"
-      },
+      }
     },
   ]
 }

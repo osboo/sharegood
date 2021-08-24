@@ -1,29 +1,37 @@
-import pytest
 import logging
+import pytest
 from azure.storage.table import TableService
 from lebowski.azure_connections import AKVConnector
 from lebowski.db import DBHelper
 from lebowski.enums import CCY, Tables
 
 
-@pytest.fixture()
-def empty_tables():
+def setup_test_db():
     akv = AKVConnector("Not used", "Not used", "Not used", env="dev")
     connection_string = akv.get_storage_connection_string()
     logger = logging.getLogger("unit-tests")
     logger.setLevel(logging.INFO)
     logger.info("Connection String " + connection_string)
-    storage_account = TableService(connection_string=connection_string)    
+    storage_account = TableService(connection_string=connection_string)
     for table_name in [Tables.SPENDINGS, Tables.MILEAGE, Tables.REMINDERS]:
         storage_account.create_table(table_name)
+    return storage_account 
 
-    tables = storage_account.list_tables()
+
+
+def tear_down_test_db(storage_account: TableService):
+    for t in [Tables.SPENDINGS, Tables.MILEAGE, Tables.REMINDERS]:
+        storage_account.delete_table(t)
+
+
+@pytest.fixture()
+def empty_tables():
+    storage_account = setup_test_db()
 
     yield storage_account
 
     # tear down
-    for t in tables:
-        storage_account.delete_table(t.name)
+    tear_down_test_db(storage_account)
 
 def test_add_gas_spending(empty_tables: TableService):
     db = DBHelper(empty_tables)
