@@ -19,7 +19,6 @@
         "cwd": "${workspaceFolder}/mybot",
         "env": { "PYTHONPATH": "${workspaceRoot}/mybot"},
       },
-      "dependsOn":["Init Shell env"]
     },
     {
       "label": "Init Function Env",

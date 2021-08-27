@@ -2,7 +2,7 @@ import re
 
 class CCY:
     BYN = "BYN"
-    RUR = "RUR"
+    RUB = "RUB"
     USD = "USD"
     EUR = "EUR"
 
@@ -12,7 +12,7 @@ class CCY:
             return cls.BYN
 
         ccys = [
-            (r'r[u,r][r,b]?', cls.RUR),
+            (r'r[u,r][r,b]?', cls.RUB),
             (r'b[y,r]?n?', cls.BYN),
             (r'usd?', cls.USD),
             (r'eur?', cls.EUR),
