@@ -22,3 +22,12 @@ class DBHelper():
             volume_str = "{:.2f}".format(volume)
         self.table_connector.insert_entity(Tables.SPENDINGS, entity)        
         return f"key: {key}, amount: {amount}, ccy: {ccy}, volume: {volume_str} л."
+    
+
+    def add_mileage_record(self, user_id: int, mileage: float) -> str:
+        key = self.get_new_key(user_id)
+        entity = {
+            "PartitionKey": "mileage", "RowKey": key, "mileage" : mileage
+        }
+        self.table_connector.insert_entity(Tables.MILEAGE, entity)
+        return f"key: {key}, mileage: {mileage}"

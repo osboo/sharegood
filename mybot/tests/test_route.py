@@ -1,6 +1,6 @@
 import pytest
 from lebowski.router import route
-from lebowski.actions import add_gas_action
+from lebowski.actions import add_gas_action, add_mileage_record_action
 from lebowski.enums import CCY, BASIC_GAS_PRICE
 
 @pytest.mark.parametrize(
@@ -44,6 +44,7 @@ def test_parse_currency(ccy, expected):
         (add_gas_action.__name__, 60.2, CCY.RUB, 30.0, "бензин 60.2 rub 30л"),
         (add_gas_action.__name__, 60.0, CCY.BYN, None, "бензин 60"),
         (add_gas_action.__name__, 60.2, CCY.RUB, 30.0, "бензин 60.2 rub 30"),
+        (add_gas_action.__name__, 60.2, CCY.RUB, 30.0, "бензин 60,2 rub 30"),
         (add_gas_action.__name__, 60.2, CCY.RUB, 30.0, "бензин 60.2 rub 30 Л"),
         (add_gas_action.__name__, 60.2, CCY.RUB, 30.23, "бензин 60.2 rub 30.23л"),
         (add_gas_action.__name__, 60.2, CCY.RUB, 30.3, "бензин 60.2 rub 30.3л"),
@@ -58,3 +59,20 @@ def test_routing_gas_spendings(action_name, amount, ccy, volume, text):
     assert args[0] == amount
     assert args[1] == ccy
     assert args[2] == volume
+
+
+@pytest.mark.parametrize(
+    "action_name,mileage,text",
+    [
+        (add_mileage_record_action.__name__, 124024.0, "пробег 124024"),
+        (add_mileage_record_action.__name__, 124024.0, "пробег 124024км"),
+        (add_mileage_record_action.__name__, 124024.0, "пробег 124024 км"),
+        (add_mileage_record_action.__name__, 124024.0, "Пробег 124024"),
+        (add_mileage_record_action.__name__, 124024.0, "пробег 124024 Км"),
+        (add_mileage_record_action.__name__, 124024.0, "пробег 124024 КМ"),
+    ]
+)
+def test_routing_mileage(action_name, mileage, text):
+    (action, args) = route(text)
+    assert action.__name__ == action_name
+    assert args[0] == mileage
