@@ -28,4 +28,9 @@ class Tables:
     MILEAGE = "mileage"
     REMINDERS = "reminders"
 
-BASIC_GAS_PRICE = 2.05
+
+class Categories:
+    GAS = "gas"
+    MILEAGE = "mileage"
+    CAR_GOODS = "car-goods"
+    REPAIR = "repair"
