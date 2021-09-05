@@ -1,12 +1,13 @@
 import re
-from lebowski.actions import add_gas_action, add_mileage_record_action, add_car_goods_record_action
+from lebowski.actions import add_gas_action, add_mileage_action, add_car_goods_action, add_car_repair_action
 from lebowski.enums import CCY
 
 
-gas_pattern = re.compile(r'(бензин)\s+(\d{1,3}[\.\,]?\d{0,2})\s*(\w{2,3})?\s*(\d{1,3}\.?\d{0,2})?\s*л?', re.IGNORECASE)
+gas_pattern = re.compile(r'(бензин)\s+(\d{1,3}[\.\,]?\d{0,2})\s*([a-zA-Z]{2,3})?\s*(\d{1,3}\.?\d{0,2})?\s*л?', re.IGNORECASE)
 mileage_pattern = re.compile(r'(пробег)\s*(\d*)\s*(км)?', re.IGNORECASE)
-auto_goods_patter = re.compile(r'(автотовары)\s*(\d*[\.\,]?\d{0,2})\s*([a-zA-Z]{2,3})?\s*(.*)', re.IGNORECASE)
-patterns = [gas_pattern, mileage_pattern, auto_goods_patter]
+car_goods_pattern = re.compile(r'(автотовары)\s*(\d*[\.\,]?\d{0,2})\s*([a-zA-Z]{2,3})?\s*(.*)', re.IGNORECASE)
+car_repair_pattern = re.compile(r'(ремонт)\s*(\d*[\.\,]?\d{0,2})\s*([a-zA-Z]{2,3})?\s*(.*)', re.IGNORECASE)
+patterns = [gas_pattern, mileage_pattern, car_goods_pattern, car_repair_pattern]
 
 def route(text: str) -> tuple:
     for pattern in patterns:
@@ -19,13 +20,19 @@ def route(text: str) -> tuple:
                 volume = float(match.group(4)) if match.group(4) is not None else None
                 return (action, [amount, ccy, volume])
             elif match.group(0).lower().startswith('пробег'):
-                action = add_mileage_record_action
+                action = add_mileage_action
                 mileage = float(match.group(2))
                 return (action, [mileage])
             elif match.group(0).lower().startswith('автотовары'):
-                action = add_car_goods_record_action
+                action = add_car_goods_action
                 amount = float(match.group(2).replace(',', '.'))
-                ccy = CCY.from_string(match.group(3)) if match.group(3) is not None else None
+                ccy = CCY.from_string(match.group(3))
+                description = match.group(4)
+                return (action, [amount, ccy, description])
+            elif match.group(0).lower().startswith('ремонт'):
+                action = add_car_repair_action
+                amount = float(match.group(2).replace(',', '.'))
+                ccy = CCY.from_string(match.group(3))
                 description = match.group(4)
                 return (action, [amount, ccy, description])
 

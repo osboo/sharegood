@@ -1,5 +1,5 @@
 import time
-from lebowski.enums import Tables
+from lebowski.enums import Tables, Categories
 from azure.storage.table import TableService
 
 
@@ -16,7 +16,7 @@ class DBHelper():
     def add_gas_record(self, user_id: int, amount: float, ccy: str, volume: float = None) -> str:
         key = self.get_new_key(user_id)
         entity = {
-            "PartitionKey": "gas", "RowKey": key, "amount" : amount, "ccy" : ccy
+            "PartitionKey": Categories.GAS, "RowKey": key, "amount" : amount, "ccy" : ccy
         }
         volume_str = None
         if volume is not None:
@@ -29,16 +29,25 @@ class DBHelper():
     def add_mileage_record(self, user_id: int, mileage: float) -> str:
         key = self.get_new_key(user_id)
         entity = {
-            "PartitionKey": "mileage", "RowKey": key, "mileage" : mileage
+            "PartitionKey": Categories.MILEAGE, "RowKey": key, "mileage" : mileage
         }
         self.table_connector.insert_entity(Tables.MILEAGE, entity)
         return f"key: {key}, mileage: {mileage}"
 
 
     def add_car_goods_record(self, user_id: int, amount: float, ccy: str, description: str) -> str:
-            key = self.get_new_key(user_id)
-            entity = {
-                "PartitionKey": "car-goods", "RowKey": key, "amount": amount, "ccy": ccy, "description": description
-            }
-            self.table_connector.insert_entity(Tables.SPENDINGS, entity)
-            return f"key: {key}, amount: {amount}, ccy: {ccy}, description: {description}"
+        key = self.get_new_key(user_id)
+        entity = {
+            "PartitionKey": Categories.CAR_GOODS, "RowKey": key, "amount": amount, "ccy": ccy, "description": description
+        }
+        self.table_connector.insert_entity(Tables.SPENDINGS, entity)
+        return f"key: {key}, amount: {amount}, ccy: {ccy}, description: {description}"
+
+
+    def add_car_repair_record(self, user_id: int, amount: float, ccy: str, description: str) -> str:
+        key = self.get_new_key(user_id)
+        entity = {
+            "PartitionKey": Categories.REPAIR, "RowKey": key, "amount": amount, "ccy": ccy, "description": description
+        }
+        self.table_connector.insert_entity(Tables.SPENDINGS, entity)
+        return f"key: {key}, amount: {amount}, ccy: {ccy}, description: {description}"

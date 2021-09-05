@@ -24,15 +24,19 @@ def add_gas_action(args: list, storage: TableService, user_id: int, akv: AKVConn
     return db.add_gas_record(user_id, amount, ccy, volume)
 
 
-def add_mileage_record_action(args: list, storage: TableService, user_id: int, akv: AKVConnector) -> str:
+def add_mileage_action(args: list, storage: TableService, user_id: int, akv: AKVConnector) -> str:
     [mileage] = args
     db = DBHelper(storage)
     return db.add_mileage_record(user_id, mileage)
 
 
-def add_car_goods_record_action(args: list, storage: TableService, user_id, akv: AKVConnector) -> str:
+def add_car_goods_action(args: list, storage: TableService, user_id, akv: AKVConnector) -> str:
     [amount, ccy, description] = args
     db = DBHelper(storage)
-    if ccy is None:
-        ccy = CCY.BYN
     return db.add_car_goods_record(user_id, amount, ccy, description)
+
+
+def add_car_repair_action(args: list, storage: TableService, user_id, akv: AKVConnector) -> str:
+    [amount, ccy, description] = args
+    db = DBHelper(storage)
+    return db.add_car_repair_record(user_id, amount, ccy, description)
