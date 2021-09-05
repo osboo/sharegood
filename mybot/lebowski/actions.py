@@ -22,3 +22,9 @@ def add_gas_action(args: list, storage: TableService, user_id: int, akv: AKVConn
             logging.error(e)
             volume = None
     return db.add_gas_record(user_id, amount, ccy, volume)
+
+
+def add_mileage_record_action(args: list, storage: TableService, user_id: int, akv: AKVConnector) -> str:
+    [mileage] = args
+    db = DBHelper(storage)
+    return db.add_mileage_record(user_id, mileage)
