@@ -6,7 +6,7 @@ from lebowski.external_api import get_eur_rate, get_gas_quotes
 from lebowski.enums import CCY
 
 
-def add_gas_action(args: list, storage: TableService, user_id: int, akv: AKVConnector):
+def add_gas_action(args: list, storage: TableService, user_id: int, akv: AKVConnector) -> str:
     [amount, ccy, volume] = args
     db = DBHelper(storage)
     if volume is None:
@@ -21,4 +21,4 @@ def add_gas_action(args: list, storage: TableService, user_id: int, akv: AKVConn
         except Exception as e:
             logging.error(e)
             volume = None
-    db.add_gas_record(user_id, amount, ccy, volume)
+    return db.add_gas_record(user_id, amount, ccy, volume)

@@ -27,8 +27,8 @@ storage_account = TableService(connection_string=akv.get_storage_connection_stri
 async def echo_message(msg: types.Message):
     try:
         (action, args) = route(msg.text)
-        action(args, storage_account, msg.from_user.id, akv)
-        await bot.send_message(msg.from_user.id, f"Received: {msg.text}")
+        result = action(args, storage_account, msg.from_user.id, akv)
+        await bot.send_message(msg.from_user.id, f"Received: {msg.text}, recorded: {result}")
     except Exception as e:
         logging.error(e)
         await bot.send_message(msg.from_user.id, f"Received: {msg.text}, server error {str(e)}")    

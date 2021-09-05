@@ -11,7 +11,8 @@ def get_gas_quotes(token: str) -> float:
     response = requests.request("GET", url, headers=headers, data=payload)
     for r in response.json()['results']:
         if r['country'] == 'Belarus':
-            return float(r['gasoline'])
+            price = r['gasoline'].replace(',', '.')
+            return float(price)
     raise ValueError('wrong response from gas prices API')
 
 
@@ -21,4 +22,5 @@ def get_eur_rate(token: str, target_ccy:str) -> float:
     headers = {}
     response = requests.request("GET", url, headers=headers, data=payload)
     r = response.json()
-    return float(r['rates'][target_ccy])
+    rate = r['rates'][target_ccy]
+    return float(rate)
