@@ -39,10 +39,10 @@ class AKVConnector():
         return self._request_from_akv("StorageAccountConnectionString")
 
     def get_gas_quotes_api_token(self) -> str:
-        return self._request_from_akv("GAS_QUOTES_API_KEY")
+        return self._request_from_akv("GasQuotesApiKey")
 
     def get_fx_quotes_api_token(self) -> str:
-        return self._request_from_akv("FX_QUOTES_API_KEY") 
+        return self._request_from_akv("FxQuotesApiKey") 
 
     def _request_from_akv(self, secret_name: str) -> str:
         if self.env == "prod":
