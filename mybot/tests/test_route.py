@@ -1,6 +1,6 @@
 import pytest
 from lebowski.router import route
-from lebowski.actions import add_gas_action, add_mileage_record_action
+from lebowski.actions import add_car_goods_record_action, add_gas_action, add_mileage_record_action
 from lebowski.enums import CCY, BASIC_GAS_PRICE
 
 @pytest.mark.parametrize(
@@ -76,3 +76,28 @@ def test_routing_mileage(action_name, mileage, text):
     (action, args) = route(text)
     assert action.__name__ == action_name
     assert args[0] == mileage
+
+
+@pytest.mark.parametrize(
+    "action_name,amount,ccy,description,text",
+    [
+        (add_car_goods_record_action.__name__, 33, None, '', "Автотовары 33"),
+        (add_car_goods_record_action.__name__, 33.35, None, '', "Автотовары 33.35"),
+        (add_car_goods_record_action.__name__, 33, None, "огнетушитель", "Автотовары 33 огнетушитель"),
+        (add_car_goods_record_action.__name__, 33.5, None, "огнетушитель", "Автотовары 33.5 огнетушитель"),
+        (add_car_goods_record_action.__name__, 33.6, None, "огнетушитель", "Автотовары 33,6 огнетушитель"),
+        (add_car_goods_record_action.__name__, 33.6, CCY.BYN, "огнетушитель", "Автотовары 33,6 Byn огнетушитель"),
+        (add_car_goods_record_action.__name__, 33.6, CCY.BYN, "огнетушитель", "Автотовары 33,6 BYN огнетушитель"),
+        (add_car_goods_record_action.__name__, 33.6, CCY.BYN, "огнетушитель, лопата", "Автотовары 33,6 BYN огнетушитель, лопата"),
+        (add_car_goods_record_action.__name__, 33.6, CCY.RUB, "огнетушитель, лопата", "Автотовары 33,6 rub огнетушитель, лопата"),
+        (add_car_goods_record_action.__name__, 33.6, CCY.RUB, "огнетушитель, лопата", "Автотовары 33,6 Ru огнетушитель, лопата"),
+        (add_car_goods_record_action.__name__, 33.6, CCY.RUB, "огнетушитель, лопата", "Автотовары 33,6 rur огнетушитель, лопата"),
+        (add_car_goods_record_action.__name__, 33.6, None, "огнетушитель, лопата", "Автотовары 33.6 огнетушитель, лопата"),
+    ]
+)
+def test_routing_car_goods_spendings(action_name, amount, ccy, description, text):
+    (action, args) = route(text)
+    assert action.__name__ == action_name
+    assert args[0] == amount
+    assert args[1] == ccy
+    assert args[2] == description

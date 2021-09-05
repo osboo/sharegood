@@ -28,3 +28,11 @@ def add_mileage_record_action(args: list, storage: TableService, user_id: int, a
     [mileage] = args
     db = DBHelper(storage)
     return db.add_mileage_record(user_id, mileage)
+
+
+def add_car_goods_record_action(args: list, storage: TableService, user_id, akv: AKVConnector) -> str:
+    [amount, ccy, description] = args
+    db = DBHelper(storage)
+    if ccy is None:
+        ccy = CCY.BYN
+    return db.add_car_goods_record(user_id, amount, ccy, description)
