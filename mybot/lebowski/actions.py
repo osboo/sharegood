@@ -40,3 +40,9 @@ def add_car_repair_action(args: list, storage: TableService, user_id, akv: AKVCo
     [amount, ccy, description] = args
     db = DBHelper(storage)
     return db.add_car_repair_record(user_id, amount, ccy, description)
+
+
+def add_mileage_reminder_action(args: list, storage: TableService, user_id, akv: AKVConnector) -> str:
+    [target_mileage, description] = args
+    db = DBHelper(storage)
+    return db.add_mileage_reminder_record(user_id, target_mileage, description)

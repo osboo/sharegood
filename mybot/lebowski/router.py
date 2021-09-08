@@ -1,5 +1,5 @@
 import re
-from lebowski.actions import add_gas_action, add_mileage_action, add_car_goods_action, add_car_repair_action
+from lebowski.actions import add_gas_action, add_mileage_action, add_car_goods_action, add_car_repair_action, add_mileage_reminder_action
 from lebowski.enums import CCY
 
 
@@ -7,7 +7,8 @@ gas_pattern = re.compile(r'(бензин)\s+(\d{1,3}[\.\,]?\d{0,2})\s*([a-zA-Z]{
 mileage_pattern = re.compile(r'(пробег)\s*(\d*)\s*(км)?', re.IGNORECASE)
 car_goods_pattern = re.compile(r'(автотовары)\s*(\d*[\.\,]?\d{0,2})\s*([a-zA-Z]{2,3})?\s*(.*)', re.IGNORECASE)
 car_repair_pattern = re.compile(r'(ремонт)\s*(\d*[\.\,]?\d{0,2})\s*([a-zA-Z]{2,3})?\s*(.*)', re.IGNORECASE)
-patterns = [gas_pattern, mileage_pattern, car_goods_pattern, car_repair_pattern]
+reminder_mileage_pattern = re.compile(r'(напоминание)\s*(\d{1,7})\s*(км)?\s*(.*)', re.IGNORECASE)
+patterns = [gas_pattern, mileage_pattern, car_goods_pattern, car_repair_pattern, reminder_mileage_pattern]
 
 def route(text: str) -> tuple:
     for pattern in patterns:
@@ -35,6 +36,11 @@ def route(text: str) -> tuple:
                 ccy = CCY.from_string(match.group(3))
                 description = match.group(4)
                 return (action, [amount, ccy, description])
+            elif match.group(0).lower().startswith('напоминание'):
+                action = add_mileage_reminder_action
+                target_mileage = int(match.group(2))
+                description = match.group(4)
+                return (action, [target_mileage, description])
 
 
     raise ValueError(f"Cannot parse command {text}")

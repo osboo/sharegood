@@ -77,3 +77,15 @@ def test_add_car_goods_int(empty_tables: TableService):
         amount = result[0]['amount'].value
     assert amount == 10.0
     assert result[0]['ccy'] == CCY.BYN
+
+
+def test_get_reminders_count(empty_tables: TableService):
+    db = DBHelper(empty_tables)
+    actual = db.get_mileage_reminders_count(123)
+    assert actual == 0
+    db.add_mileage_reminder_record(123, 123, "reminder 1")
+    actual = db.get_mileage_reminders_count(123)
+    assert actual == 1
+    db.add_mileage_reminder_record(123, 456, "reminder 2")
+    actual = db.get_mileage_reminders_count(123)
+    assert actual == 2
