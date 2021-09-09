@@ -27,8 +27,16 @@ def add_gas_action(args: list, storage: TableService, user_id: int, akv: AKVConn
 def add_mileage_action(args: list, storage: TableService, user_id: int, akv: AKVConnector) -> str:
     [mileage] = args
     db = DBHelper(storage)
-    return db.add_mileage_record(user_id, mileage)
+    adding_mileage_report = db.add_mileage_record(user_id, mileage)
 
+    result_list = []
+    result_list.append(adding_mileage_report)
+    reminders = db.list_reminders(user_id)
+    for r in reminders:
+        if "Уже наступило" in r:
+            result_list.append(r)
+
+    return "\n".join(result_list)
 
 def add_car_goods_action(args: list, storage: TableService, user_id, akv: AKVConnector) -> str:
     [amount, ccy, description] = args

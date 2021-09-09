@@ -53,7 +53,7 @@ async def process_message(msg: types.Message):
     try:
         (action, args) = route(msg.text)
         result = action(args, storage_account, msg.from_user.id, akv)
-        await bot.send_message(msg.from_user.id, f"Received: {msg.text}, recorded: {result}")
+        await bot.send_message(msg.from_user.id, result)
     except Exception as e:
         logging.error(e)
         await bot.send_message(msg.from_user.id, f"Received: {msg.text}, server error {str(e)}")    
