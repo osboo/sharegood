@@ -8,6 +8,7 @@ from aiogram.dispatcher import Dispatcher
 
 from lebowski.azure_connections import AKVConnector
 from lebowski.router import route
+from lebowski.db import DBHelper
 from middlewares.access import AccessMiddleware
 
 TENANT_ID = os.getenv('TENANT_ID')
@@ -23,12 +24,36 @@ dp.middleware.setup(AccessMiddleware(access_ids=akv.get_allowed_users()))
 storage_account = TableService(connection_string=akv.get_storage_connection_string(), is_emulated=(ENV != "prod"))
 
 
+@dp.message_handler(commands=['help'])
+async def process_help(msg: types.Message):
+    await msg.reply("""
+Бот для учёта расходов на машину и прочее. Также напоминает о важных событиях, например что надо проверить двигатель
+или что пора заменить паспорт.
+Команды:
+/help - это подсказка
+/напоминания - выводит список всех напоминалок, с порядковыми номерами и указанием как скоро наступит событие
+""")
+
+
+@dp.message_handler(commands=['напоминания'])
+async def process_list_reminders(msg: types.Message):
+    db = DBHelper(storage_account)
+    try:
+        reminders = db.list_reminders(msg.from_user.id)
+        await bot.send_message(msg.from_user.id, f"Количество напоминалок: {len(reminders)}")
+        for r in reminders:
+            await bot.send_message(msg.from_user.id, r)
+    except Exception as e:
+        logging.error(e)
+        await bot.send_message(msg.from_user.id, f"Received: {msg.text}, server error {str(e)}")    
+
+
 @dp.message_handler()
-async def echo_message(msg: types.Message):
+async def process_message(msg: types.Message):
     try:
         (action, args) = route(msg.text)
         result = action(args, storage_account, msg.from_user.id, akv)
-        await bot.send_message(msg.from_user.id, f"Received: {msg.text}, recorded: {result}")
+        await bot.send_message(msg.from_user.id, result)
     except Exception as e:
         logging.error(e)
         await bot.send_message(msg.from_user.id, f"Received: {msg.text}, server error {str(e)}")    

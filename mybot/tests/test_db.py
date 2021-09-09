@@ -18,7 +18,6 @@ def setup_test_db():
     return storage_account 
 
 
-
 def tear_down_test_db(storage_account: TableService):
     for t in [Tables.SPENDINGS, Tables.MILEAGE, Tables.REMINDERS]:
         storage_account.delete_table(t)
@@ -77,3 +76,34 @@ def test_add_car_goods_int(empty_tables: TableService):
         amount = result[0]['amount'].value
     assert amount == 10.0
     assert result[0]['ccy'] == CCY.BYN
+
+
+def test_get_reminders_count(empty_tables: TableService):
+    db = DBHelper(empty_tables)
+    actual = db.get_mileage_reminders_count(123)
+    assert actual == 0
+    db.add_mileage_reminder_record(123, 123, "reminder 1")
+    actual = db.get_mileage_reminders_count(123)
+    assert actual == 1
+    db.add_mileage_reminder_record(123, 456, "reminder 2")
+    actual = db.get_mileage_reminders_count(123)
+    assert actual == 2
+
+
+def test_current_mileage(empty_tables: TableService):
+    db = DBHelper(empty_tables)
+    assert db.get_current_mileage(123) == 0
+    db.add_mileage_record(123, 421000)
+    db.add_mileage_record(123, 421001)
+    db.add_mileage_record(123, 421002)
+    assert db.get_current_mileage(123) == 421002
+
+
+def test_expired_notification(empty_tables: TableService):
+    db = DBHelper(empty_tables)
+    db.add_mileage_record(123, 10)
+    db.add_mileage_reminder_record(123, 45, "Поменять цвет волос на 45")
+    db.add_mileage_reminder_record(123, 110, "Whatever")
+    db.add_mileage_record(123, 100)
+    reminders = db.list_reminders(123)
+    assert "Уже наступило" in reminders[1]

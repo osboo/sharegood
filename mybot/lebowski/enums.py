@@ -34,3 +34,4 @@ class Categories:
     MILEAGE = "mileage"
     CAR_GOODS = "car-goods"
     REPAIR = "repair"
+    REMINDER_MILEAGE = "reminder-mileage"
