@@ -1,5 +1,5 @@
 import re
-from lebowski.actions import add_gas_action, add_mileage_action, add_car_goods_action, add_car_repair_action, add_mileage_reminder_action
+from lebowski.actions import *
 from lebowski.enums import CCY
 
 
@@ -8,7 +8,10 @@ mileage_pattern = re.compile(r'(пробег)\s*(\d*)\s*(км)?', re.IGNORECASE)
 car_goods_pattern = re.compile(r'(автотовары)\s*(\d*[\.\,]?\d{0,2})\s*([a-zA-Z]{2,3})?\s*(.*)', re.IGNORECASE)
 car_repair_pattern = re.compile(r'(ремонт)\s*(\d*[\.\,]?\d{0,2})\s*([a-zA-Z]{2,3})?\s*(.*)', re.IGNORECASE)
 reminder_mileage_pattern = re.compile(r'(напоминание)\s*(\d{1,7})\s*(км)?\s*(.*)', re.IGNORECASE)
-patterns = [gas_pattern, mileage_pattern, car_goods_pattern, car_repair_pattern, reminder_mileage_pattern]
+patterns = [
+    gas_pattern, mileage_pattern, car_goods_pattern,
+    car_repair_pattern, reminder_mileage_pattern
+]
 
 def route(text: str) -> tuple:
     for pattern in patterns:
@@ -22,7 +25,7 @@ def route(text: str) -> tuple:
                 return (action, [amount, ccy, volume])
             elif match.group(0).lower().startswith('пробег'):
                 action = add_mileage_action
-                mileage = float(match.group(2))
+                mileage = int(match.group(2))
                 return (action, [mileage])
             elif match.group(0).lower().startswith('автотовары'):
                 action = add_car_goods_action
