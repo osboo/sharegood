@@ -1,0 +1,12 @@
+PartitionKey,RowKey,Timestamp,amount,amount@type,ccy,ccy@type,description,description@type,volume,volume@type
+car-goods,229598673:18369120018.371582,2021-09-05T22:13:01.812Z,148.5,Edm.Double,BYN,Edm.String,страховка,Edm.String,,
+car-goods,229598673:18369120129.546936,2021-09-05T22:11:10.633Z,6,Edm.Double,BYN,Edm.String,лекарства в аптечку,Edm.String,,
+car-goods,229598673:18369120146.30981,2021-09-05T22:10:53.863Z,18,Edm.Double,BYN,Edm.String,"(аптечка, шторка от солнца)",Edm.String,,
+car-goods,229598673:18369120168.946255,2021-09-05T22:10:31.227Z,44,Edm.Double,BYN,Edm.String,"(армтек: лопата, знак, тужурка)",Edm.String,,
+car-goods,229598673:18369120189.196743,2021-09-05T22:10:10.971Z,33,Edm.Double,BYN,Edm.String,огнетушитель,Edm.String,,
+gas,229598673:18369119944.36572,2021-09-05T22:14:15.827Z,2804,Edm.Double,RUB,Edm.String,,,45,Edm.Double
+gas,229598673:18369119979.670258,2021-09-05T22:13:40.518Z,2830,Edm.Double,RUB,Edm.String,,,42,Edm.Double
+gas,229598673:18369120090.380436,2021-09-05T22:11:49.796Z,2803,Edm.Double,RUB,Edm.String,,,46.89365081093753,Edm.Double
+gas,229598673:18369120213.81877,2021-09-05T22:09:46.350Z,1856,Edm.Double,RUB,Edm.String,,,31.050522977203013,Edm.Double
+repair,229598673:18369120037.996815,2021-09-05T22:12:42.188Z,33.5,Edm.Double,BYN,Edm.String,ежегодное ТО,Edm.String,,
+repair,229598673:18369120108.0968,2021-09-05T22:11:32.088Z,1409,Edm.Double,BYN,Edm.String,большое ТО,Edm.String,,

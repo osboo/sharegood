@@ -1,0 +1,6 @@
+PartitionKey,RowKey,Timestamp,TargetMileage,TargetMileage@type,description,description@type,index,index@type
+reminder-mileage,229598673:18368812968.197,2021-09-09T11:30:31.817Z,163000,Edm.Int64,регулировка клапанов двигателя,Edm.String,5,Edm.Int64
+reminder-mileage,229598673:18368812991.336,2021-09-09T11:30:08.677Z,130000,Edm.Int64,заменить моторное масло,Edm.String,4,Edm.Int64
+reminder-mileage,229598673:18368813009.986,2021-09-09T11:29:50.029Z,173000,Edm.Int64,замена тормозной жидкости,Edm.String,3,Edm.Int64
+reminder-mileage,229598673:18368813032.234,2021-09-09T11:29:27.778Z,163000,Edm.Int64,заменить масло в заднем редукторе,Edm.String,2,Edm.Int64
+reminder-mileage,229598673:18368813055.803,2021-09-09T11:29:04.210Z,138000,Edm.Int64,заменить масло в коробке,Edm.String,1,Edm.Int64
