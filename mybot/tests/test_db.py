@@ -1,20 +1,44 @@
+import os
 import logging
 import pytest
+import pandas as pd
 from azure.storage.table import TableService
 from lebowski.azure_connections import AKVConnector
 from lebowski.db import DBHelper
 from lebowski.enums import CCY, Tables, Categories
 
 
-def setup_test_db():
+def load_from_csv(relative_path, storage_account):
+    filenames = os.listdir(relative_path)
+    for filename in filenames:
+        if filename.endswith(".csv"):
+            table_name = filename[:-4]
+            storage_account.create_table(table_name)
+            df = pd.read_csv(os.path.join(relative_path, filename))
+            for _, row in df.iterrows():
+                d = pd.Series.to_dict(row)
+                entity = {}
+                for k, v in d.items():
+                    if k == 'Timestamp' or k.endswith('@type'):
+                        pass
+                    else:
+                        entity[k] = v
+                storage_account.insert_entity(table_name, entity)
+
+
+def setup_test_db(path: str):
     akv = AKVConnector("Not used", "Not used", "Not used", env="dev")
     connection_string = akv.get_storage_connection_string()
     logger = logging.getLogger("unit-tests")
     logger.setLevel(logging.INFO)
     logger.info("Connection String " + connection_string)
     storage_account = TableService(connection_string=connection_string)
-    for table_name in [Tables.SPENDINGS, Tables.MILEAGE, Tables.REMINDERS]:
-        storage_account.create_table(table_name)
+    if path is None:
+        table_names = [Tables.SPENDINGS, Tables.MILEAGE, Tables.REMINDERS]
+        for table_name in table_names:
+            storage_account.create_table(table_name)
+    else:
+        load_from_csv(path, storage_account)
     return storage_account 
 
 
@@ -25,7 +49,7 @@ def tear_down_test_db(storage_account: TableService):
 
 @pytest.fixture()
 def empty_tables():
-    storage_account = setup_test_db()
+    storage_account = setup_test_db(None)
 
     yield storage_account
 
