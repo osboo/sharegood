@@ -1,15 +1,16 @@
-import os
 import logging
+import os
 
 import azure.functions as func
-from azure.storage.table import TableService
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
+from azure.storage.table import TableService
+from middlewares.access import AccessMiddleware
 
 from lebowski.azure_connections import AKVConnector
-from lebowski.router import route
 from lebowski.db import DBHelper
-from middlewares.access import AccessMiddleware
+from lebowski.router import route
+from lebowski.actions import compute_stat_action
 
 TENANT_ID = os.getenv('TENANT_ID')
 CLIENT_ID = os.getenv('APP_ID')
@@ -30,12 +31,25 @@ async def process_help(msg: types.Message):
 Бот для учёта расходов на машину и прочее. Также напоминает о важных событиях, например что надо проверить двигатель
 или что пора заменить паспорт.
 Команды:
-/help - это подсказка
-/напоминания - выводит список всех напоминалок, с порядковыми номерами и указанием как скоро наступит событие
+/help - эта подсказка
+/reminders - выводит список всех напоминалок, с порядковыми номерами и указанием как скоро наступит событие
+/stat - выводит пробег, стоимости, аналитику по стоимостям, временные характеристики
 """)
 
 
-@dp.message_handler(commands=['напоминания'])
+@dp.message_handler(commands=['stat'])
+async def process_stat(msg: types.Message):
+    db = DBHelper(storage_account)
+    try:
+        datasets = db.get_stat_data(msg.from_user.id)
+        results = compute_stat_action(datasets)
+
+    except Exception as e:
+        logging.error(e)
+        await bot.send_message(msg.from_user.id, f"Received: {msg.text}, server error {str(e)}")    
+
+
+@dp.message_handler(commands=['reminders'])
 async def process_list_reminders(msg: types.Message):
     db = DBHelper(storage_account)
     try:

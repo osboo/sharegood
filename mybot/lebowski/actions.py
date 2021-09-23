@@ -1,9 +1,12 @@
 import logging
+
 from azure.storage.table import TableService
-from lebowski.db import DBHelper
+
 from lebowski.azure_connections import AKVConnector
-from lebowski.external_api import get_eur_rate, get_gas_quotes
-from lebowski.enums import CCY
+from lebowski.db import DBHelper
+from lebowski.enums import CCY, Tables
+from lebowski.external_api import get_eur_rates, get_gas_quotes
+from lebowski.stat import convert_spendings_to_eur, get_total_mileage, get_total_spending_eur
 
 
 def add_gas_action(args: list, storage: TableService, user_id: int, akv: AKVConnector) -> str:
@@ -13,7 +16,7 @@ def add_gas_action(args: list, storage: TableService, user_id: int, akv: AKVConn
         try:
             price_eur = get_gas_quotes(akv.get_gas_quotes_api_token())
             if ccy != CCY.EUR:
-                rate = get_eur_rate(akv.get_fx_quotes_api_token(), ccy)
+                rate = get_eur_rates(akv.get_fx_quotes_api_token())[ccy]
             else:
                 rate = 1.0
 
@@ -54,3 +57,24 @@ def add_mileage_reminder_action(args: list, storage: TableService, user_id: int,
     [target_mileage, description] = args
     db = DBHelper(storage)
     return db.add_mileage_reminder_record(user_id, target_mileage, description)
+
+
+def compute_stat_action(dataset: dict, akv: AKVConnector) -> dict:
+    result = {}
+
+    result['total_mileage'] = get_total_mileage(dataset[Tables.MILEAGE])
+
+    try:
+        rates = get_eur_rates(akv.get_fx_quotes_api_token())
+    except Exception as e:
+        logging.error(e)
+        rates = {
+            CCY.BYN: 2.93,
+            CCY.RUB: 85.30,
+            CCY.USD: 1.17
+        }
+    df_spendings_eur = convert_spendings_to_eur(dataset[Tables.SPENDINGS], rates)
+    result['total_spending'] = get_total_spending_eur(df_spendings_eur)
+
+
+    return result

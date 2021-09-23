@@ -1,14 +1,16 @@
-import os
 import logging
-import pytest
+import os
+
 import pandas as pd
+import pytest
 from azure.storage.table import TableService
+from lebowski.actions import compute_stat_action
 from lebowski.azure_connections import AKVConnector
 from lebowski.db import DBHelper
-from lebowski.enums import CCY, Tables, Categories
+from lebowski.enums import CCY, Categories, Tables
 
 
-def load_from_csv(relative_path, storage_account):
+def load_from_csv(relative_path:str, storage_account: TableService):
     filenames = os.listdir(relative_path)
     for filename in filenames:
         if filename.endswith(".csv"):
@@ -27,12 +29,7 @@ def load_from_csv(relative_path, storage_account):
 
 
 def setup_test_db(path: str):
-    akv = AKVConnector("Not used", "Not used", "Not used", env="dev")
-    connection_string = akv.get_storage_connection_string()
-    logger = logging.getLogger("unit-tests")
-    logger.setLevel(logging.INFO)
-    logger.info("Connection String " + connection_string)
-    storage_account = TableService(connection_string=connection_string)
+    storage_account = get_test_storage()
     if path is None:
         table_names = [Tables.SPENDINGS, Tables.MILEAGE, Tables.REMINDERS]
         for table_name in table_names:
@@ -41,20 +38,43 @@ def setup_test_db(path: str):
         load_from_csv(path, storage_account)
     return storage_account 
 
+def get_test_storage() -> TableService:
+    akv = AKVConnector("Not used", "Not used", "Not used", env="dev")
+    connection_string = akv.get_storage_connection_string()
+    logger = logging.getLogger("unit-tests")
+    logger.setLevel(logging.INFO)
+    logger.info("Connection String " + connection_string)
+    storage_account = TableService(connection_string=connection_string)
+    return storage_account
 
-def tear_down_test_db(storage_account: TableService):
-    for t in [Tables.SPENDINGS, Tables.MILEAGE, Tables.REMINDERS]:
-        storage_account.delete_table(t)
+
+def tear_down_test_db():
+    storage_account = get_test_storage()
+    for t in storage_account.list_tables():
+        storage_account.delete_table(t.name)
 
 
 @pytest.fixture()
 def empty_tables():
+    tear_down_test_db()
     storage_account = setup_test_db(None)
 
     yield storage_account
 
     # tear down
-    tear_down_test_db(storage_account)
+    tear_down_test_db()
+
+
+@pytest.fixture()
+def dump1_tables():
+    tear_down_test_db()
+    storage_account = setup_test_db("mybot/tests/test-data/dump1")
+
+    yield storage_account
+
+    # tear down
+    tear_down_test_db()
+
 
 def test_add_gas_spending(empty_tables: TableService):
     db = DBHelper(empty_tables)
@@ -63,7 +83,7 @@ def test_add_gas_spending(empty_tables: TableService):
     entities = empty_tables.query_entities(Tables.SPENDINGS, filter=f"PartitionKey eq '{Categories.GAS}' and RowKey gt '{test_moment_key}' and RowKey lt '123:20000000000'")
     result = [e for e in entities]
     assert len(result) == 1
-    assert result[0]['amount'] == 30.0
+    assert db.get_float_value(result[0]['amount']) == 30.0
 
 
 def test_add_mileage(empty_tables: TableService):
@@ -94,10 +114,7 @@ def test_add_car_goods_int(empty_tables: TableService):
     entities = empty_tables.query_entities(Tables.SPENDINGS, filter=f"PartitionKey eq '{Categories.CAR_GOODS}' and RowKey gt '{test_moment_key}' and RowKey lt '123:20000000000'")
     result = [e for e in entities]
     assert len(result) == 1
-    try:
-        amount = result[0]['amount'] / 1.0
-    except Exception:
-        amount = result[0]['amount'].value
+    amount = db.get_float_value(result[0]['amount'])
     assert amount == 10.0
     assert result[0]['ccy'] == CCY.BYN
 
@@ -131,3 +148,25 @@ def test_expired_notification(empty_tables: TableService):
     db.add_mileage_record(123, 100)
     reminders = db.list_reminders(123)
     assert "Уже наступило" in reminders[1]
+
+@pytest.mark.parametrize(
+    "user_id,expected_length",
+    [
+        (229598672, 2), 
+        (229598673, 4),
+        (229598674, 2)
+    ]
+)
+def test_extract_history_by_user_id(dump1_tables: TableService, user_id: int, expected_length: int):
+    db = DBHelper(dump1_tables)
+    df = db.extract_history_by_user_id(Tables.MILEAGE, user_id=user_id)
+    assert len(df) == expected_length
+
+
+def test_compute_stat_action(dump1_tables: TableService):
+    db = DBHelper(dump1_tables)
+    d = db.get_stat_data(user_id=229598673)
+    akv = AKVConnector("Not used", "Not used", "Not used", env="dev")
+    r = compute_stat_action(d, akv)
+    assert r['total_mileage'] == 124190
+    assert abs(r['total_spending'] - 698.14) <= 1e-2
