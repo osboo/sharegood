@@ -1,6 +1,10 @@
 import time
-from lebowski.enums import Tables, Categories
+from typing import Any
+
+import pandas as pd
 from azure.storage.table import TableService
+
+from lebowski.enums import Categories, Tables
 
 
 class DBHelper():
@@ -16,11 +20,11 @@ class DBHelper():
     def add_gas_record(self, user_id: int, amount: float, ccy: str, volume: float = None) -> str:
         key = self.get_new_key(user_id)
         entity = {
-            "PartitionKey": Categories.GAS, "RowKey": key, "amount" : amount, "ccy" : ccy
+            "PartitionKey": Categories.GAS, "RowKey": key, "amount" : amount * 1.0, "ccy" : ccy
         }
         volume_str = None
         if volume is not None:
-            entity["volume"] = volume
+            entity["volume"] = volume * 1.0
             volume_str = "{:.2f}".format(volume)
         self.table_connector.insert_entity(Tables.SPENDINGS, entity)        
         return f"key: {key}, amount: {amount}, ccy: {ccy}, volume: {volume_str} л."
@@ -103,4 +107,35 @@ class DBHelper():
             if current_mileage != 0:
                 s += f"Осталось: {get_diff(current_mileage, r['TargetMileage'], r['index'])}\n"
             result.append(s)
-        return result 
+        return result
+    
+
+    def extract_history_by_user_id(self, table_name: str, user_id: int) -> pd.DataFrame:
+        test_moment_key = self.get_new_key(user_id)
+        next_key = self.get_new_key(user_id + 1)
+        items = self.table_connector.query_entities(table_name, filter=f"RowKey gt '{test_moment_key}' and RowKey lt '{next_key}")
+        return pd.DataFrame(items)
+
+
+    def get_stat_data(self, user_id: int) -> dict:
+        tables = [Tables.SPENDINGS, Tables.MILEAGE, Tables.REMINDERS]
+        datasets = {}
+        for table_name in tables:
+            datasets[table_name] = self.extract_history_by_user_id(table_name, user_id)
+        datasets[Tables.SPENDINGS]['amount'] = pd.Series(
+            self.get_float_value(row.amount) for row in datasets[Tables.SPENDINGS].itertuples()
+        )
+        datasets[Tables.SPENDINGS]['volume'] = pd.Series(
+            self.get_float_value(row.volume) for row in datasets[Tables.SPENDINGS].itertuples()
+        )
+        return datasets
+
+
+    def get_float_value(self, value) -> float:
+        try:
+            return value / 1.0
+        except Exception:
+            try:
+                return value.value
+            except Exception:
+                return 0.0

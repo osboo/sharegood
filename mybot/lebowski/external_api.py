@@ -16,11 +16,11 @@ def get_gas_quotes(token: str) -> float:
     raise ValueError('wrong response from gas prices API')
 
 
-def get_eur_rate(token: str, target_ccy:str) -> float:
+def get_eur_rates(token: str) -> float:
     url = f"http://api.exchangeratesapi.io/v1/latest?access_key={token}&symbols=USD,BYN,RUB&format=1"
     payload={}
     headers = {}
     response = requests.request("GET", url, headers=headers, data=payload)
     r = response.json()
-    rate = r['rates'][target_ccy]
-    return float(rate)
+    rates = r['rates']
+    return rates
