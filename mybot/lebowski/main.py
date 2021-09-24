@@ -4,13 +4,17 @@ import os
 import azure.functions as func
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
+from aiogram.types.message import ParseMode
+from aiogram.utils.emoji import emojize
+from aiogram.utils.markdown import bold, text
 from azure.storage.table import TableService
+from babel import numbers
 from middlewares.access import AccessMiddleware
 
+from lebowski.actions import compute_stat_action
 from lebowski.azure_connections import AKVConnector
 from lebowski.db import DBHelper
 from lebowski.router import route
-from lebowski.actions import compute_stat_action
 
 TENANT_ID = os.getenv('TENANT_ID')
 CLIENT_ID = os.getenv('APP_ID')
@@ -42,7 +46,14 @@ async def process_stat(msg: types.Message):
     db = DBHelper(storage_account)
     try:
         datasets = db.get_stat_data(msg.from_user.id)
-        results = compute_stat_action(datasets)
+        results = compute_stat_action(datasets, akv)
+        answer = text(
+            text(emojize(":car:"), bold("Пробег:"),results['total_mileage'], "км"),
+            text(emojize(":moneybag:"), bold("Траты"), numbers.format_currency(results['total_spending'], 'EUR')),
+            text(emojize(":chart_with_upwards_trend:"), bold("Цена км:"), numbers.format_currency(results['total_spending'] / results['total_mileage'], 'EUR')),
+            sep='\n'
+        )
+        await bot.send_message(msg.from_user.id, answer, parse_mode=ParseMode.MARKDOWN)
 
     except Exception as e:
         logging.error(e)

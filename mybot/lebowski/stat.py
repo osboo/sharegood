@@ -4,7 +4,7 @@ import pandas as pd
 
 def get_total_mileage(df_mileage: pd.DataFrame) -> int:
     try:
-        total_mileage = df_mileage['mileage'].iloc[0]
+        total_mileage = df_mileage['mileage'].iloc[0] - df_mileage['mileage'].iloc[-1]
         return total_mileage
     except Exception as e:
         logging.error(e)

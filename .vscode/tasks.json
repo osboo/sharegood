@@ -14,7 +14,7 @@
     {
       "label": "Setup Database",
       "type": "shell",
-      "command": "source ${workspaceFolder}/.env && export $(cut -d= -f1 ${workspaceFolder}/.env) && python tests/setup_test_db.py clean && python tests/setup_test_db.py init",
+      "command": "source ${workspaceFolder}/.env && export $(cut -d= -f1 ${workspaceFolder}/.env) && python tests/setup_test_db.py clean && python tests/setup_test_db.py init --payload tests/test-data/dump1",
       "options": {
         "cwd": "${workspaceFolder}/mybot",
         "env": { "PYTHONPATH": "${workspaceRoot}/mybot"},
