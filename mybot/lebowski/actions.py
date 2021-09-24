@@ -75,6 +75,5 @@ def compute_stat_action(dataset: dict, akv: AKVConnector) -> dict:
         }
     df_spendings_eur = convert_spendings_to_eur(dataset[Tables.SPENDINGS], rates)
     result['total_spending'] = get_total_spending_eur(df_spendings_eur)
-
-
+    result['km_cost'] = result['total_spending'] / result['total_mileage'] if result['total_mileage'] > 0 else 0.0
     return result

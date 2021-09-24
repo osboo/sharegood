@@ -4,13 +4,14 @@ import os
 import pandas as pd
 import pytest
 from azure.storage.table import TableService
-from lebowski.actions import compute_stat_action
 from lebowski.azure_connections import AKVConnector
 from lebowski.db import DBHelper
 from lebowski.enums import CCY, Categories, Tables
+from lebowski.stat import (convert_spendings_to_eur, get_total_mileage,
+                           get_total_spending_eur)
 
 
-def load_from_csv(relative_path:str, storage_account: TableService):
+def load_from_csv(relative_path: str, storage_account: TableService):
     filenames = os.listdir(relative_path)
     for filename in filenames:
         if filename.endswith(".csv"):
@@ -36,7 +37,8 @@ def setup_test_db(path: str):
             storage_account.create_table(table_name)
     else:
         load_from_csv(path, storage_account)
-    return storage_account 
+    return storage_account
+
 
 def get_test_storage() -> TableService:
     akv = AKVConnector("Not used", "Not used", "Not used", env="dev")
@@ -76,11 +78,30 @@ def dump1_tables():
     tear_down_test_db()
 
 
+@pytest.fixture()
+def dump1_dataframes_and_rates():
+    tear_down_test_db()
+    storage_account = setup_test_db("mybot/tests/test-data/dump1")
+    db = DBHelper(storage_account)
+    d = db.get_stat_data(user_id=229598673)
+
+    rates = {
+        CCY.BYN: 2.93,
+        CCY.RUB: 85.30,
+        CCY.USD: 1.17
+    }
+    yield (d, rates)
+
+    # tear down
+    tear_down_test_db()
+
+
 def test_add_gas_spending(empty_tables: TableService):
     db = DBHelper(empty_tables)
     db.add_gas_record("123", 30, CCY.BYN)
     test_moment_key = db.get_new_key("123")
-    entities = empty_tables.query_entities(Tables.SPENDINGS, filter=f"PartitionKey eq '{Categories.GAS}' and RowKey gt '{test_moment_key}' and RowKey lt '123:20000000000'")
+    entities = empty_tables.query_entities(
+        Tables.SPENDINGS, filter=f"PartitionKey eq '{Categories.GAS}' and RowKey gt '{test_moment_key}' and RowKey lt '123:20000000000'")
     result = [e for e in entities]
     assert len(result) == 1
     assert db.get_float_value(result[0]['amount']) == 30.0
@@ -90,7 +111,8 @@ def test_add_mileage(empty_tables: TableService):
     db = DBHelper(empty_tables)
     db.add_mileage_record("123", 124302)
     test_moment_key = db.get_new_key("123")
-    entities = empty_tables.query_entities(Tables.MILEAGE, filter=f"PartitionKey eq '{Categories.MILEAGE}' and RowKey gt '{test_moment_key}' and RowKey lt '123:20000000000'")
+    entities = empty_tables.query_entities(
+        Tables.MILEAGE, filter=f"PartitionKey eq '{Categories.MILEAGE}' and RowKey gt '{test_moment_key}' and RowKey lt '123:20000000000'")
     result = [e for e in entities]
     assert len(result) == 1
     assert result[0]['mileage'] == 124302.0
@@ -100,7 +122,8 @@ def test_add_car_goods_float(empty_tables: TableService):
     db = DBHelper(empty_tables)
     db.add_car_goods_record(123, 10.05, CCY.BYN, "огнетушитель")
     test_moment_key = db.get_new_key("123")
-    entities = empty_tables.query_entities(Tables.SPENDINGS, filter=f"PartitionKey eq '{Categories.CAR_GOODS}' and RowKey gt '{test_moment_key}' and RowKey lt '123:20000000000'")
+    entities = empty_tables.query_entities(
+        Tables.SPENDINGS, filter=f"PartitionKey eq '{Categories.CAR_GOODS}' and RowKey gt '{test_moment_key}' and RowKey lt '123:20000000000'")
     result = [e for e in entities]
     assert len(result) == 1
     assert result[0]['amount'] == 10.05
@@ -111,7 +134,8 @@ def test_add_car_goods_int(empty_tables: TableService):
     db = DBHelper(empty_tables)
     db.add_car_goods_record(123, 10.0, CCY.BYN, "огнетушитель")
     test_moment_key = db.get_new_key("123")
-    entities = empty_tables.query_entities(Tables.SPENDINGS, filter=f"PartitionKey eq '{Categories.CAR_GOODS}' and RowKey gt '{test_moment_key}' and RowKey lt '123:20000000000'")
+    entities = empty_tables.query_entities(
+        Tables.SPENDINGS, filter=f"PartitionKey eq '{Categories.CAR_GOODS}' and RowKey gt '{test_moment_key}' and RowKey lt '123:20000000000'")
     result = [e for e in entities]
     assert len(result) == 1
     amount = db.get_float_value(result[0]['amount'])
@@ -149,10 +173,11 @@ def test_expired_notification(empty_tables: TableService):
     reminders = db.list_reminders(123)
     assert "Уже наступило" in reminders[1]
 
+
 @pytest.mark.parametrize(
     "user_id,expected_length",
     [
-        (229598672, 2), 
+        (229598672, 2),
         (229598673, 4),
         (229598674, 2)
     ]
@@ -163,10 +188,15 @@ def test_extract_history_by_user_id(dump1_tables: TableService, user_id: int, ex
     assert len(df) == expected_length
 
 
-def test_compute_stat_action(dump1_tables: TableService):
-    db = DBHelper(dump1_tables)
-    d = db.get_stat_data(user_id=229598673)
-    akv = AKVConnector("Not used", "Not used", "Not used", env="dev")
-    r = compute_stat_action(d, akv)
-    assert r['total_mileage'] == 124190
-    assert abs(r['total_spending'] - 698.14) <= 1e-2
+def test_stat_spendings(dump1_dataframes_and_rates: tuple):
+    d = dump1_dataframes_and_rates[0]
+    rates = dump1_dataframes_and_rates[1]
+    df_spendings_eur = convert_spendings_to_eur(d[Tables.SPENDINGS], rates)
+    total_spending = get_total_spending_eur(df_spendings_eur)        
+    assert abs(total_spending - 698.14) <= 1e-2
+
+
+def test_stat_mileage(dump1_dataframes_and_rates: tuple):    
+    d = dump1_dataframes_and_rates[0]
+    total_mileage = get_total_mileage(d[Tables.MILEAGE])
+    assert total_mileage == 124190 - 123033

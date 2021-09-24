@@ -12,9 +12,6 @@ if __name__ == "__main__":
     if args.command == 'init':        
         setup_test_db(args.payload)
     elif args.command == 'clean':
-        akv = AKVConnector("Not used", "Not used", "Not used", env="dev")
-        connection_string = akv.get_storage_connection_string()
-        storage_account = TableService(connection_string=connection_string)
-        tear_down_test_db(storage_account)
+        tear_down_test_db()
     else:
         raise Exception("Unknown command: '%s'" % args)
