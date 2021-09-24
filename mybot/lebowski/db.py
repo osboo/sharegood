@@ -113,7 +113,7 @@ class DBHelper():
     def extract_history_by_user_id(self, table_name: str, user_id: int) -> pd.DataFrame:
         test_moment_key = self.get_new_key(user_id)
         next_key = self.get_new_key(user_id + 1)
-        items = self.table_connector.query_entities(table_name, filter=f"RowKey gt '{test_moment_key}' and RowKey lt '{next_key}")
+        items = self.table_connector.query_entities(table_name, filter=f"RowKey gt '{test_moment_key}' and RowKey lt '{next_key}'")
         return pd.DataFrame(items)
 
 
