@@ -3,12 +3,18 @@ import os
 
 import pandas as pd
 import pytest
+from dotenv import load_dotenv
 from azure.storage.table import TableService
 from lebowski.azure_connections import AKVConnector
 from lebowski.db import DBHelper
 from lebowski.enums import CCY, Categories, Tables
 from lebowski.stat import (convert_spendings_to_eur, get_total_mileage,
                            get_total_spending_eur)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def load_env():
+    load_dotenv()
 
 
 def load_from_csv(relative_path: str, storage_account: TableService):
@@ -45,7 +51,6 @@ def get_test_storage() -> TableService:
     connection_string = akv.get_storage_connection_string()
     logger = logging.getLogger("unit-tests")
     logger.setLevel(logging.INFO)
-    logger.info("Connection String " + connection_string)
     storage_account = TableService(connection_string=connection_string)
     return storage_account
 

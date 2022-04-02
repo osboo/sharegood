@@ -7,8 +7,10 @@ Telegram bot for tracking car expences and notifications of regular service
 
 - Re-open folder in container
 - `ngrok http 7071`
-- put https temprary URL to `.env` file as `NGROK_URL`
+- put https temprary URL to `.env` file as `NGROK_URL`. Env file should be in form of KEY=VALUE
+- define `SharegoodToken` variable in .env file. Check Botfather to get token for corresponding bot.
 - run `bash utils/set-webhook.sh`
+- define `botUsersIDs` as `xxxxxxxxx;` allowed telegram ids
 - run func in VS Code - press F5
 
 ## Run locally
@@ -20,6 +22,13 @@ Telegram bot for tracking car expences and notifications of regular service
 - run `bash utils/set-webhook.sh`
 - run `func host start`
 
+## Run tests
+ - Define local Azurite as temp database `StorageAccountConnectionString` equal to 
+ ```
+ DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;
+ ```
+ - Run Azurite: see [doc](https://docs.microsoft.com/en-us/azure/storage/common/storage-use-azurite?tabs=visual-studio-code)
+ - run `pytests mybot/tests` or use VSCode Test Explorer
 
 ## Useful links
 ### Preparation
